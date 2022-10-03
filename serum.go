@@ -19,11 +19,29 @@ import (
 
 type Error = ErrorInterface
 
+// ErrorInterface is the minimal interface that must be implemented to be a Serum error.
+// This is also the interface that go-serum-analyzer is looking for, if you use that tool
+// (although not by name; matching the pattern is sufficient).
+//
+// This interface is not often seen in user code.
+// Usually, we still recommend user code mostly refers to "error", as is normal in golang.
+// Functions throughout this package will accept and return error as a parameter,
+// and apply serum behaviors to those values by use of feature detection,
+// which removes all need to refer to this interface in user code.
 type ErrorInterface interface {
 	error
 	Code() string
 }
 
+// Code will access and return the error code for any Serum-style error.
+//
+// This function takes the general "error" type and feature-detects for Serum behaviors,
+// but still has fallback behaviors for any error value.
+//
+// If the given error is _not_ recognizably Serum-styled, a code string will be invented on the fly.
+// This invented code string will have the prefix "bestguess-golang-" followed by a munge of the golang type name.
+// This fallback is meant to be minimally functional and help find the source of coding mistakes that lead to its creation,
+// but should not be seen in a well-formed program.
 func Code(err error) string {
 	// If it's Serum: great.
 	if e2, ok := err.(ErrorInterface); ok {
@@ -64,8 +82,16 @@ type ErrorInterfaceWithCause interface {
 }
 
 // DetailsMap returns the details of an error as a map.
-// (Use Details to get the content in its original order, if order is important.)
-// The result is an empty map of the error is not a Serum error.
+//
+// This function takes the general "error" type and feature-detects for Serum behaviors,
+// but still has fallback behaviors for any error value.
+//
+// Note that you may wish to use the Details function instead,
+// if the original ordering of the details fields is important;
+// because it uses golang maps, this function is not order-preserving.
+//
+// If the given error is not recognizably Serum-styled,
+// this function returns an empty map.
 //
 // The map should not be mutated; it may be the original memory from the error value.
 func DetailsMap(err error) map[string]string {
@@ -84,9 +110,15 @@ func DetailsMap(err error) map[string]string {
 }
 
 // Details returns the details key-values of an error as a slice of pairs of strings.
-// (Use DetailsMap to get the content as a golang map, if that's more convenient,
-// but be aware with that method the order of entries will not be preserved.)
-// Nil is returned if the error is not a Serum error.
+//
+// This function takes the general "error" type and feature-detects for Serum behaviors,
+// but still has fallback behaviors for any error value.
+//
+// If the given error is not recognizably Serum-styled,
+// this function returns nil.
+//
+// Note that you may also be able to use the DetailsMap to get the same content as a golang map, for convenience,
+// but be aware that access mechanism does not support order-preservation, and may often be slightly slower performance.
 //
 // The result should not be mutated; it may be the original memory from the error value.
 func Details(err error) [][2]string {

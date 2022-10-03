@@ -8,14 +8,18 @@ import (
 )
 
 // ToJSON is a helper function to turn any error into JSON.
-// It is suitable to use in implementing `encoding/json.Marshaler.MarshalJSON` if implementing your own error types.
+// It is suitable to use in implementing `encoding/json.Marshaler.MarshalJSON` if implementing your own error types,
+// and it is used for that purpose in the ErrorValue type provided by this package.
 // If is also suitable for freestanding use on any error value (even non-Serum error values).
 //
 // If the error is a Serum error (per ErrorInterface),
 // we'll serialize it completely, including message, details, code, and cause, all distinctly.
 // If the error is not a Serum error, we'll serialize it anyway,
-// but fudge as necessary to produce a result that will at least be Serum serial spec compliant and able to be deserialized as a Serum error
-// (the golang type will appear as part of the code, and the `Error() string` will be used as if a message, and `errors.Unwrap` will be used to find a cause, etc).
+// but fudge as necessary to produce a result that will at least be Serum serial spec compliant and able to be deserialized as a Serum error.
+//
+// In fudge mode: the golang type will appear as part of the serum code;
+// the `Error() string` will be used as a message;
+// `errors.Unwrap` will be used to find a cause; etc.
 func ToJSON(err error) ([]byte, error) {
 	// Error handling throughout this function would appear lax; it is not.
 	// Where we are encoding to a buffer, and know we are handling only strings, errors from encode are not really possible, and so the branch to check is omitted.
