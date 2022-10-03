@@ -79,6 +79,24 @@ type ErrorInterfaceWithCause interface {
 	Unwrap() error
 }
 
+// Message returns the message field of a Serum-style error.
+//
+// This function takes the general "error" type and feature-detects for Serum behaviors,
+// but still has fallback behaviors for any error value.
+// It returns empty string for other errors.
+//
+// If you are producing text for a user, consider the SynthesizeString function.
+// Since the message field is optional in Serum, it may be blank;
+// it is also defined as _not_ including the error's code.
+// The SynthesizeString function will produce a human-readable string
+// containing the code as well as the message, if it's present.
+func Message(err error) string {
+	if e2, ok := err.(ErrorInterfaceWithMessage); ok {
+		return e2.Message()
+	}
+	return ""
+}
+
 // DetailsMap returns the details of an error as a map.
 //
 // This function takes the general "error" type and feature-detects for Serum behaviors,
