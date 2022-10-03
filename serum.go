@@ -17,8 +17,6 @@ import (
 	"strings"
 )
 
-type Error = ErrorInterface
-
 // ErrorInterface is the minimal interface that must be implemented to be a Serum error.
 // This is also the interface that go-serum-analyzer is looking for, if you use that tool
 // (although not by name; matching the pattern is sufficient).
