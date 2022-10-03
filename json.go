@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 // ToJSON is a helper function to turn any error into JSON.
@@ -43,7 +44,7 @@ func ToJSON(err error) ([]byte, error) {
 		buf.WriteString(`, "details":`)
 		pairs(details).marshalJSON(&buf)
 	}
-	if cause := errors.Unwrap(err); cause != nil {
+	if cause := errors.Unwrap(err); cause != nil && !reflect.ValueOf(cause).IsNil() {
 		buf.WriteString(`, "cause":`)
 		if err := encoder.Encode(cause); err != nil {
 			return nil, err

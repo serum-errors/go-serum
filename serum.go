@@ -229,7 +229,8 @@ func SynthesizeString(err ErrorInterface) string {
 	}
 	if e2, ok := err.(ErrorInterfaceWithCause); ok {
 		cause := e2.Unwrap()
-		if cause != nil {
+		// We'll doublecheck for typed nil here, because if it is present, the outcome is simply too extremely silly.
+		if cause != nil && !reflect.ValueOf(cause).IsNil() {
 			sb.WriteString(": caused by: ")
 			sb.WriteString(cause.Error())
 		}

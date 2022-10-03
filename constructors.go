@@ -50,7 +50,11 @@ func Errorf(ecode string, fmtPattern string, args ...interface{}) error {
 // code string that is prefixed with "golang-bestguess-"; etc.)
 //
 // If given a value that is already of type *ErrorValue, it is returned unchanged.
-func Standardize(other error) *ErrorValue {
+//
+// This function returns ErrorInterface rather than concretely *ErrorValue,
+// to reduce the chance of creating "untyped nil" problems in practical usage,
+// but it is valid to directly cast the result to *ErrorValue if you wish.
+func Standardize(other error) ErrorInterface {
 	if other == nil {
 		return nil
 	}
