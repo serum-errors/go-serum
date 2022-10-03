@@ -98,11 +98,11 @@ func (a pairs) marshalJSON(buf *bytes.Buffer) error {
 		if i > 0 {
 			buf.WriteByte(',')
 		}
-		if err := encoder.Encode(a[0]); err != nil {
+		if err := encoder.Encode(a[i][0]); err != nil {
 			return err
 		}
 		buf.WriteByte(':')
-		if err := encoder.Encode(a[1]); err != nil {
+		if err := encoder.Encode(a[i][1]); err != nil {
 			return err
 		}
 	}
