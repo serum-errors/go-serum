@@ -175,6 +175,29 @@ func Detail(err error, whichDetail string) string {
 	return ""
 }
 
+// Cause returns the cause of any Serum-style error.
+//
+// This function takes the general "error" type and feature-detects for Serum behaviors,
+// but still has fallback behaviors for any error value.
+//
+// If the given error is not recognizably Serum-styled,
+// this function falls back to golang's standard `errors.Unwrap`.
+//
+// (This function is really only provided for completeness and consistency of naming;
+// it's functionally identical to golang's standard `errors.Unwrap`.)
+func Cause(err error) error {
+	// This is the same as `errors.Unwrap`.
+	// The code is replicated because a little copying is better than a little dependency.
+	// We don't have a `serum.ErrorValue.Cause` method and just stick to `Unwrap` naming because there's little purpose in being special here.
+	u, ok := err.(interface {
+		Unwrap() error
+	})
+	if !ok {
+		return nil
+	}
+	return u.Unwrap()
+}
+
 // ---
 
 // ... below might belong in a different package; they're for helping you write types.
