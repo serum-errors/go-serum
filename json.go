@@ -51,28 +51,28 @@ func ToJSON(err error) ([]byte, error) {
 
 // ---
 
-func (e *ErrorStruct) UnmarshalJSON(b []byte) error {
+func (e *ErrorValue) UnmarshalJSON(b []byte) error {
 	var target struct {
-		// Yes, this is almost ErrorStruct itself, but:
-		// - this uses the unexported pairs type,
+		// Yes, this is almost serum.Data itself, but:
+		// - this uses the unexported 'pairs' type,
 		// - this needs a concrete type for the cause, or things don't fly right,
-		// - and not having the json tags on the ErrorStruct type just seems wise, since it doesn't actually use them and there's no sense in misleading a reader.
-		TheCode    string       `json:"code"`
-		TheMessage string       `json:"message,omitempty"`
-		TheDetails pairs        `json:"details,omitempty"`
-		TheCause   *ErrorStruct `json:"cause,omitempty"`
+		// - and not having the json tags on the serum.Data type just seems wise, since it doesn't actually use them and there's no sense in misleading a reader.
+		Code    string      `json:"code"`
+		Message string      `json:"message,omitempty"`
+		Details pairs       `json:"details,omitempty"`
+		Cause   *ErrorValue `json:"cause,omitempty"`
 	}
 	if err := json.Unmarshal(b, &target); err != nil {
 		return err
 	}
-	e.TheCode = target.TheCode
-	e.TheMessage = target.TheMessage
-	e.TheDetails = target.TheDetails
-	e.TheCause = target.TheCause
+	e.Data.Code = target.Code
+	e.Data.Message = target.Message
+	e.Data.Details = target.Details
+	e.Data.Cause = target.Cause
 	return nil
 }
 
-func (e *ErrorStruct) MarshalJSON() ([]byte, error) {
+func (e *ErrorValue) MarshalJSON() ([]byte, error) {
 	return ToJSON(e)
 }
 
