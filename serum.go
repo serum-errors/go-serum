@@ -41,6 +41,10 @@ type ErrorInterface interface {
 // This fallback is meant to be minimally functional and help find the source of coding mistakes that lead to its creation,
 // but should not be seen in a well-formed program.
 func Code(err error) string {
+	// If it's nil: roll that up to emptystring.
+	if err == nil {
+		return ""
+	}
 	// If it's Serum: great.
 	if e2, ok := err.(ErrorInterface); ok {
 		code := e2.Code()
