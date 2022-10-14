@@ -46,8 +46,10 @@ func ToJSON(err error) ([]byte, error) {
 	}
 	if cause := errors.Unwrap(err); cause != nil && !isEmptyValue(reflect.ValueOf(cause)) {
 		buf.WriteString(`, "cause":`)
-		if err := encoder.Encode(cause); err != nil {
+		if causeJson, err := ToJSON(cause); err != nil {
 			return nil, err
+		} else {
+			buf.Write(causeJson)
 		}
 	}
 	buf.WriteByte('}')
