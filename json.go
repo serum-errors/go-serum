@@ -44,7 +44,7 @@ func ToJSON(err error) ([]byte, error) {
 		buf.WriteString(`, "details":`)
 		pairs(details).marshalJSON(&buf)
 	}
-	if cause := errors.Unwrap(err); cause != nil && !reflect.ValueOf(cause).IsNil() {
+	if cause := errors.Unwrap(err); cause != nil && !isEmptyValue(reflect.ValueOf(cause)) {
 		buf.WriteString(`, "cause":`)
 		if err := encoder.Encode(cause); err != nil {
 			return nil, err
@@ -136,4 +136,22 @@ func (a *pairs) UnmarshalJSON(b []byte) error {
 			*a = append(*a, [2]string{key, value})
 		}
 	}
+}
+
+func isEmptyValue(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		return v.Len() == 0
+	case reflect.Bool:
+		return !v.Bool()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return v.Int() == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return v.Uint() == 0
+	case reflect.Float32, reflect.Float64:
+		return v.Float() == 0
+	case reflect.Interface, reflect.Pointer:
+		return v.IsNil()
+	}
+	return false
 }
