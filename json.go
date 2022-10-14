@@ -56,6 +56,20 @@ func ToJSON(err error) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// ToJSONString is similar to ToJSON, but returns exactly one value,
+// which makes it easy to use in chained calls, or to hand to a Printf parameter.
+//
+//    fmt.Sprintf(os.Stderr, "%s\n", serum.ToJSONString(err))
+//
+// ... is an easy way to wrap up your program!
+func ToJSONString(err error) string {
+	bs, err := ToJSON(err)
+	if err != nil {
+		bs, _ = ToJSON(err)
+	}
+	return string(bs)
+}
+
 // ---
 
 func (e *ErrorValue) UnmarshalJSON(b []byte) error {
