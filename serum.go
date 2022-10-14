@@ -57,7 +57,10 @@ func Code(err error) string {
 	// If it's not: we'll attempt to do something useful from the golang type name.
 	// "Useful" might be a stretch, but this should at least help a developer find their questionable code quickly.
 	// We do not commit to the stability of this string.  A program of well-defined errors should not encounter this path.
-	rt := reflect.TypeOf(err).Elem()
+	rt := reflect.TypeOf(err)
+	for rt.Kind() == reflect.Pointer {
+		rt = rt.Elem()
+	}
 	return "bestguess-golang-" + path.Base(rt.PkgPath()) + "-" + rt.Name()
 }
 
