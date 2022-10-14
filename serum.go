@@ -90,7 +90,7 @@ type ErrorInterfaceWithCause interface {
 //
 // This function takes the general "error" type and feature-detects for Serum behaviors,
 // but still has fallback behaviors for any error value.
-// It returns empty string for other errors.
+// It returns the same as (error).Error() for other errors.
 //
 // If you are producing text for a user, consider the SynthesizeString function.
 // Since the message field is optional in Serum, it may be blank;
@@ -101,7 +101,7 @@ func Message(err error) string {
 	if e2, ok := err.(ErrorInterfaceWithMessage); ok {
 		return e2.Message()
 	}
-	return ""
+	return err.Error()
 }
 
 // DetailsMap returns the details of an error as a map.
