@@ -22,6 +22,9 @@ func TestTemplateParse(t *testing.T) {
 		{"a {{ b }}", []parsed{{literal: "a "}, {interp: "b"}}},
 		{"{{b}} a", []parsed{{interp: "b"}, {literal: " a"}}},
 		{"{{b}}", []parsed{{interp: "b"}}},
+		{"{{b|q}}", []parsed{{interp: "b", process: "q"}}},
+		{"{{b | q}}", []parsed{{interp: "b", process: "q"}}},
+		{"{{ b | q }}", []parsed{{interp: "b", process: "q"}}},
 	}
 	for _, test := range tt {
 		result := parse(test.template)

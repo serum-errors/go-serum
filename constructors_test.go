@@ -57,3 +57,28 @@ func ExampleError() {
 	// 		}
 	// 	}
 }
+
+func ExampleErrorWithTemplateQuoting() {
+	err := serum.Error("demo-error-withquotes",
+		serum.WithMessageTemplate("message detail {{thedetail|q}} should be quoted"),
+		serum.WithDetail("thedetail", "whee! wow!"),
+	)
+	fmt.Printf("the error as a string:\n\t%v\n", err)
+	jb, jsonErr := json.MarshalIndent(err, "\t", "\t")
+	if jsonErr != nil {
+		panic(jsonErr)
+	}
+	fmt.Printf("the error as json:\n\t%s\n", jb)
+
+	// Output:
+	// the error as a string:
+	// 	demo-error-withquotes: message detail "whee! wow!" should be quoted
+	// the error as json:
+	// 	{
+	// 		"code": "demo-error-withquotes",
+	// 		"message": "message detail \"whee! wow!\" should be quoted",
+	// 		"details": {
+	// 			"thedetail": "whee! wow!"
+	// 		}
+	// 	}
+}

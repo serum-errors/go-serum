@@ -1,6 +1,7 @@
 package serum
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -30,8 +31,9 @@ we expect this system to be used on data quantities where linear scan is much ch
 */
 
 type parsed struct {
-	literal string
-	interp  string
+	literal string // If set: just a literal.
+	interp  string // If set: the variable name.
+	process string // If set along with interp: a process to apply.  Only currently supported value is "q", which means apply quoting.
 }
 
 func parse(s string) (result []parsed) {
@@ -50,7 +52,14 @@ func parse(s string) (result []parsed) {
 			result = append(result, parsed{literal: s[0:start]})
 		}
 		if end > 0 {
-			result = append(result, parsed{interp: strings.TrimSpace(s[start+2 : start+2+end])})
+			body := s[start+2 : start+2+end]
+			ss := strings.SplitN(body, "|", 2)
+			name := strings.TrimSpace(ss[0])
+			process := ""
+			if len(ss) == 2 {
+				process = strings.TrimSpace(ss[1])
+			}
+			result = append(result, parsed{interp: name, process: process})
 		}
 		if end == 0 { // edgecase: if we found "{{}}", treat it like a literal.
 			result = append(result, parsed{literal: s[start : start+4]})
@@ -76,7 +85,15 @@ func interpolate(ps []parsed, table [][2]string) string {
 			for _, row := range table {
 				if row[0] == p.interp {
 					match = true
-					sb.WriteString(row[1])
+					emit := row[1]
+					switch p.process {
+					case "": // do nothing
+					case "q": // quote it!
+						emit = strconv.Quote(emit)
+					default: // put something weird back in the output so you can see your typo.
+						emit += "{{?!|" + p.process + "}}"
+					}
+					sb.WriteString(emit)
 					break
 				}
 			}
