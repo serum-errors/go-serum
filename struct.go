@@ -51,3 +51,18 @@ func (e *ErrorValue) Unwrap() error { return e.Data.Cause }
 
 // Error implements the golang error interface.  The returned string will contain the code, the message if present, and the string of the cause.  Per Serum convention, it does not include any of the details fields.
 func (e *ErrorValue) Error() string { return SynthesizeString(e) }
+
+// Is implements errors.Is so that it works for non-serum errors
+// This allows non-serum-aware packages to take serum errors if they use errors.Is for error comparisons
+func (e *ErrorValue) Is(target error) bool {
+	if Code(e) != Code(target) {
+		return false
+	}
+	if Message(e) != Message(target) {
+		return false
+	}
+	// We don't check detail map because it _should_ be synthesized into message.
+	// We should not unwrap here because errors.Is handles unwrapping.
+	return true
+}
+ 
