@@ -17,6 +17,9 @@ import (
 // it will be coerced into one, by use of the Standardize function.
 // (We consider this coersion appropriate to perform immediately,
 // because otherwise the resulting value would fail to round-trip through serialization.)
+// WARNING: Currently wrapping errors in this way duplicates the wrapped error's message.
+// This results in degenerate messages which are difficult to understand.
+// It is strongly recommended to use the Error constructor instead when wrapping errors.
 //
 // Errors:
 //
