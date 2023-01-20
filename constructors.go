@@ -17,9 +17,13 @@ import (
 // it will be coerced into one, by use of the Standardize function.
 // (We consider this coersion appropriate to perform immediately,
 // because otherwise the resulting value would fail to round-trip through serialization.)
-// WARNING: Currently wrapping errors in this way duplicates the wrapped error's message.
-// This results in degenerate messages which are difficult to understand.
-// It is strongly recommended to use the Error constructor instead when wrapping errors.
+// 
+// Attaching an error as a "cause" using the %w verb attaches the info in two ways:
+// first, it makes that error value available to later recover via `serum.Cause`,
+// and second, it also places the message of the wrapped error into the message of the new error,
+// in whatever position the %w verb was used in the new message.
+// Use this carefully; it is possible to create redundant error messages with this.
+// Use the serum.Error constructor if you need more fine-grained control over messages and cause composition.
 //
 // Errors:
 //
