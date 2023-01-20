@@ -73,7 +73,6 @@ func (e *ErrorValue) Is(target error) bool {
 			return false
 		}
 	}
-	// We don't check detail map because it _should_ be synthesized into message.
 	// We should not unwrap here because errors.Is handles unwrapping.
 	return true
 }
