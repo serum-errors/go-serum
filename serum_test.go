@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
+	"os"
 	"testing"
 
 	"github.com/serum-errors/go-serum"
@@ -104,6 +106,44 @@ func TestErrorsIs(t *testing.T) {
 			if !errors.Is(wrapper, err) {
 				t.Fatal("serum-cause wrapping should resolve")
 			}
+		})
+		t.Run("with os.PathError", func(t *testing.T) {
+			_, fserr := os.Open("non-existing-file")
+			t.Logf("err: %#v", fserr)
+			t.Logf("unwrap err: %[1]T %[1]#v", errors.Unwrap(fserr))
+			t.Logf("err is fs.ErrNotExist: %t", errors.Is(fserr, fs.ErrNotExist))
+			t.Logf("unwrap err is fs.ErrNotExist: %t", errors.Is(errors.Unwrap(fserr), fs.ErrNotExist))
+			if fserr == nil {
+				t.Fatal("error should not be nil")
+			}
+			if !errors.Is(fserr, fs.ErrNotExist) {
+				t.Fatalf("error should be ErrNotExist")
+			}
+			t.Run("custom re-wrap", func(t *testing.T) {
+				pe, ok := fserr.(*fs.PathError)
+				if !ok {
+					t.Fatalf("error should be an fs.PathError")
+				}
+				t.Logf("inside err: %#v", pe.Err)
+				err := serum.Error("rewrap", serum.WithCause(pe.Err),
+					serum.WithMessageTemplate("unable to {{op}} path {{path | q}}"),
+					serum.WithDetail("op", pe.Op),
+					serum.WithDetail("path", pe.Path),
+				)
+				if !errors.Is(err, fs.ErrNotExist) {
+					// This doesn't work because we've lost the fs.PathError implementation entirely via Synthesize.
+					t.Log(fs.ErrNotExist)
+					t.Fatalf("wrapped error should still be a ErrNotExist; %s", err.Error())
+				}
+			})
+			t.Run("wrap with serum", func(t *testing.T) {
+				err := serum.Error("rewrap", serum.WithCause(fserr))
+				if !errors.Is(err, fs.ErrNotExist) {
+					// This doesn't work because we've lost the fs.PathError implementation entirely via Synthesize.
+					t.Log(fs.ErrNotExist)
+					t.Fatalf("wrapped error should still be a ErrNotExist; %s", err.Error())
+				}
+			})
 		})
 	})
 	t.Run("non-equivalent serum errors", func(t *testing.T) {
